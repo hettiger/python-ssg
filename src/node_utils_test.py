@@ -1,42 +1,11 @@
 import unittest
 
-from src.htmlnode import LeafNode
-from src.textnode import TextNode, TextType, text_node_to_html_node
+from src.html_node import LeafNode
+from src.node_utils import text_node_to_html_node
+from src.text_node import TextNode, TextType
 
 
-class TestTextNode(unittest.TestCase):
-    def test_text_type_eq(self):
-        self.assertEqual(TextType.TEXT, TextType.TEXT)
-        self.assertEqual(TextType.TEXT, TextType.TEXT.value)
-
-    def test_text_type_neq(self):
-        self.assertNotEqual(TextType.TEXT, TextType.BOLD)
-        self.assertNotEqual(TextType.TEXT, TextType.BOLD.value)
-
-    def test_eq(self):
-        node = TextNode("This is a text node", TextType.BOLD)
-        node2 = TextNode("This is a text node", TextType.BOLD)
-        self.assertEqual(node, node2)
-
-    def test_neq_if_types_are_different(self):
-        node = TextNode("This is a text node", TextType.BOLD)
-        node2 = TextNode("This is a text node", TextType.ITALIC)
-        self.assertNotEqual(node, node2)
-
-    def test_neq_if_text_is_different(self):
-        node = TextNode("This is a text node", TextType.BOLD)
-        node2 = TextNode("This is another text node", TextType.BOLD)
-        self.assertNotEqual(node, node2)
-
-    def test_neq_if_url_is_different(self):
-        node = TextNode("This is a text node", TextType.LINK, "https://www.boot.dev")
-        node2 = TextNode("This is a text node", TextType.LINK, "https://www.google.com")
-        self.assertNotEqual(node, node2)
-
-    def test_neq_if_is_not_a_text_node(self):
-        node = TextNode("This is a text node", TextType.LINK, "https://www.boot.dev")
-        self.assertNotEqual(node, True)
-
+class NodeUtilsTest(unittest.TestCase):
     def test_text_node_to_html_node_text(self):
         node = text_node_to_html_node(TextNode("This is a text node", TextType.TEXT))
         self.assertTrue(isinstance(node, LeafNode))
@@ -73,5 +42,5 @@ class TestTextNode(unittest.TestCase):
             text_node_to_html_node(TextNode(text="This is a invalid node", text_type='invalid'))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

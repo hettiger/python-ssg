@@ -1,10 +1,10 @@
 import unittest
 
-from src.htmlnode import HTMLNode
-from src.htmlnode import LeafNode, ParentNode
+from src.html_node import HTMLNode
+from src.html_node import LeafNode, ParentNode
 
 
-class TestHTMLNode(unittest.TestCase):
+class HTMLNodeTest(unittest.TestCase):
     def test_props_to_html(self):
         node = HTMLNode(tag="div", props={"class": "test-class"})
         attributes = node.props_to_html()

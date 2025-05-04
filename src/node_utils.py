@@ -1,30 +1,5 @@
-from enum import Enum
-
-from src.htmlnode import HTMLNode, LeafNode
-
-
-class TextType(Enum):
-    TEXT = 'text'
-    BOLD = 'bold'
-    ITALIC = 'italic'
-    CODE = 'code'
-    LINK = 'link'
-    IMAGE = 'image'
-
-    def __eq__(self, other):
-        return self.value == other or isinstance(other, Enum) and self.value == other.value
-
-class TextNode:
-    def __init__(self, text: str, text_type: TextType, url: str = None):
-        self.text = text
-        self.text_type = text_type
-        self.url = url
-
-    def __eq__(self, other):
-        return isinstance(other, TextNode) and self.text == other.text and self.text_type == other.text_type and self.url == other.url
-
-    def __repr__(self):
-        return f'TextNode({self.text}, {self.text_type.value}, {self.url})'
+from src.html_node import HTMLNode, LeafNode
+from src.text_node import TextNode, TextType
 
 
 def text_node_to_html_node(text_node: TextNode) -> HTMLNode:
