@@ -104,7 +104,7 @@ class NodeUtilsTest(unittest.TestCase):
         self.assertEqual(expected, new_nodes)
 
     def test_split_nodes_delimiter_unclosed(self):
-        old_nodes = [TextNode("This is _text is invalid markdown", TextType.CODE)]
+        old_nodes = [TextNode("This is _text is invalid markdown", TextType.TEXT)]
 
         with self.assertRaises(ValueError):
             split_nodes_delimiter(old_nodes, "_", TextType.ITALIC)
