@@ -1,5 +1,3 @@
-from collections.abc import Generator
-
 from src.html_node import HTMLNode, LeafNode
 from src.text_node import TextNode, TextType
 from itertools import chain
@@ -24,25 +22,25 @@ def text_node_to_html_node(text_node: TextNode) -> HTMLNode:
 
 
 def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: TextType) -> list[TextNode]:
-    def split_node_delimiter(node: TextNode) -> Generator[TextNode, None, None]:
-        d_len = len(delimiter)
-        start = str.find(node.text, delimiter, 0)
-        end = str.find(node.text, delimiter, start + d_len) + d_len
+    def split_node(node: TextNode) -> list[TextNode]:
+        if node.text_type != TextType.TEXT:
+            return [node]
 
-        if start == -1:  # No match, we're done!
-            yield node
-            return
-        if end - d_len == -1:
-            raise ValueError(f"The delimiter »{delimiter}« is not closed. This is invalid Markdown!")
+        nodes = []
+        sections = node.text.split(delimiter)
+        n_sections = len(sections)
 
-        preceding_text = node.text[0:start]
-        matching_text = node.text[start+d_len:end-d_len]
-        following_text = node.text[end:]
-        if preceding_text:
-            yield TextNode(preceding_text, node.text_type)
-        if matching_text:
-            yield TextNode(matching_text, text_type)
-        if following_text:
-            yield from split_node_delimiter(TextNode(following_text, node.text_type))
+        if n_sections % 2 == 0:
+            raise ValueError("invalid markdown, formatted section not closed")
 
-    return list(chain(*[split_node_delimiter(old_node) for old_node in old_nodes]))
+        for i in range(n_sections):
+            if sections[i] == "":
+                continue
+            if i % 2 == 0:
+                nodes.append(TextNode(sections[i], TextType.TEXT))
+            else:
+                nodes.append(TextNode(sections[i], text_type))
+
+        return nodes
+
+    return list(chain.from_iterable(map(split_node, old_nodes)))
