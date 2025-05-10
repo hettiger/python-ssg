@@ -28,20 +28,20 @@ def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: 
         d_len = len(delimiter)
         start = str.find(node.text, delimiter, 0)
         end = str.find(node.text, delimiter, start + d_len) + d_len
-        preceding_text = node.text[0:start]
-        matching_text = node.text[start+d_len:end-d_len]
-        following_text = node.text[end:]
 
         if start == -1:  # No match, we're done!
             yield node
             return
+        if end - d_len == -1:
+            raise ValueError(f"The delimiter »{delimiter}« is not closed. This is invalid Markdown!")
 
+        preceding_text = node.text[0:start]
+        matching_text = node.text[start+d_len:end-d_len]
+        following_text = node.text[end:]
         if preceding_text:
             yield TextNode(preceding_text, node.text_type)
-
         if matching_text:
             yield TextNode(matching_text, text_type)
-
         if following_text:
             yield from split_node_delimiter(TextNode(following_text, node.text_type))
 

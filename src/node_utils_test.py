@@ -73,6 +73,20 @@ class NodeUtilsTest(unittest.TestCase):
 
         self.assertEqual(expected, new_nodes)
 
+    def test_split_nodes_delimiter_multiple_matches(self):
+        old_nodes = [TextNode("This is _italic_ text with _multiple_ matches", TextType.TEXT)]
+        expected = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" text with ", TextType.TEXT),
+            TextNode("multiple", TextType.ITALIC),
+            TextNode(" matches", TextType.TEXT),
+        ]
+
+        new_nodes = split_nodes_delimiter(old_nodes, "_", TextType.ITALIC)
+
+        self.assertEqual(expected, new_nodes)
+
     def test_split_nodes_delimiter_no_matches(self):
         old_nodes = [TextNode("This is text with no delimiter matches", TextType.TEXT)]
         expected = [TextNode("This is text with no delimiter matches", TextType.TEXT)]
@@ -80,6 +94,20 @@ class NodeUtilsTest(unittest.TestCase):
         new_nodes = split_nodes_delimiter(old_nodes, "_", TextType.ITALIC)
 
         self.assertEqual(expected, new_nodes)
+
+    def test_split_nodes_delimiter_already_split(self):
+        old_nodes = [TextNode("This is text is already split", TextType.CODE)]
+        expected = [TextNode("This is text is already split", TextType.CODE)]
+
+        new_nodes = split_nodes_delimiter(old_nodes, "_", TextType.ITALIC)
+
+        self.assertEqual(expected, new_nodes)
+
+    def test_split_nodes_delimiter_unclosed(self):
+        old_nodes = [TextNode("This is _text is invalid markdown", TextType.CODE)]
+
+        with self.assertRaises(ValueError):
+            split_nodes_delimiter(old_nodes, "_", TextType.ITALIC)
 
 
 if __name__ == '__main__':
