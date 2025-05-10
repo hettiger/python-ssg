@@ -1,7 +1,7 @@
 import unittest
 
 from src.html_node import LeafNode
-from src.node_utils import text_node_to_html_node
+from src.node_utils import text_node_to_html_node, split_nodes_delimiter
 from src.text_node import TextNode, TextType
 
 
@@ -40,6 +40,46 @@ class NodeUtilsTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             # noinspection PyTypeChecker
             text_node_to_html_node(TextNode(text="This is a invalid node", text_type='invalid'))
+
+    def test_split_nodes_delimiter_bold(self):
+        old_nodes = [TextNode("This is a **text** node", TextType.TEXT)]
+        expected = [
+            TextNode("This is a ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" node", TextType.TEXT),
+        ]
+
+        new_nodes = split_nodes_delimiter(old_nodes, "**", TextType.BOLD)
+
+        self.assertEqual(expected, new_nodes)
+
+    def test_split_nodes_delimiter_code(self):
+        old_nodes = [TextNode("This is text with a `code block` word", TextType.TEXT)]
+        expected = [
+            TextNode("This is text with a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" word", TextType.TEXT),
+        ]
+
+        new_nodes = split_nodes_delimiter(old_nodes, "`", TextType.CODE)
+
+        self.assertEqual(expected, new_nodes)
+
+    def test_split_nodes_delimiter_only_italic(self):
+        old_nodes = [TextNode("_This is italic text_", TextType.TEXT)]
+        expected = [TextNode("This is italic text", TextType.ITALIC)]
+
+        new_nodes = split_nodes_delimiter(old_nodes, "_", TextType.ITALIC)
+
+        self.assertEqual(expected, new_nodes)
+
+    def test_split_nodes_delimiter_no_matches(self):
+        old_nodes = [TextNode("This is text with no delimiter matches", TextType.TEXT)]
+        expected = [TextNode("This is text with no delimiter matches", TextType.TEXT)]
+
+        new_nodes = split_nodes_delimiter(old_nodes, "_", TextType.ITALIC)
+
+        self.assertEqual(expected, new_nodes)
 
 
 if __name__ == '__main__':
