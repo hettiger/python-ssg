@@ -109,6 +109,17 @@ class NodeUtilsTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             split_nodes_delimiter(old_nodes, "_", TextType.ITALIC)
 
+    def test_split_nodes_delimiter_empty_match(self):
+        old_nodes = [TextNode("This is __ text", TextType.TEXT)]
+        expected = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode(" text", TextType.TEXT),
+        ]
+
+        new_nodes = split_nodes_delimiter(old_nodes, "_", TextType.ITALIC)
+
+        self.assertEqual(expected, new_nodes)
+
 
 if __name__ == '__main__':
     unittest.main()
