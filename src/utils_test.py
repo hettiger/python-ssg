@@ -1,11 +1,11 @@
 import unittest
 
 from src.html_node import LeafNode
-from src.node_utils import text_node_to_html_node, split_nodes_delimiter
+from src.utils import text_node_to_html_node, split_nodes_delimiter
 from src.text_node import TextNode, TextType
 
 
-class NodeUtilsTest(unittest.TestCase):
+class UtilsTest(unittest.TestCase):
     def test_text_node_to_html_node_text(self):
         node = text_node_to_html_node(TextNode("This is a text node", TextType.TEXT))
         self.assertTrue(isinstance(node, LeafNode))
