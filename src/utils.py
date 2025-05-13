@@ -110,16 +110,11 @@ def _split_nodes(
     return list(chain.from_iterable(map(split_node, old_nodes)))
 
 
-TValue = TypeVar('TValue')
-def pipeline(value: TValue, pipes: list[Callable[[TValue], TValue]]) -> TValue:
-    return reduce(lambda nodes, pipe: pipe(nodes), pipes, value)
-
-
 def text_to_textnodes(text: str) -> list[TextNode]:
-    return pipeline([TextNode(text=text, text_type=TextType.TEXT)], pipes=[
-        lambda nodes: split_nodes_delimiter(nodes, "_", TextType.ITALIC),
-        lambda nodes: split_nodes_delimiter(nodes, "**", TextType.BOLD),
-        lambda nodes: split_nodes_delimiter(nodes, "`", TextType.CODE),
-        lambda nodes: split_nodes_image(nodes),
-        lambda nodes: split_nodes_link(nodes),
-    ])
+    nodes = [TextNode(text=text, text_type=TextType.TEXT)]
+    nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    return nodes
