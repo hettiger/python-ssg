@@ -1,7 +1,8 @@
 import unittest
 
 from src.html_node import LeafNode
-from src.utils import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links
+from src.utils import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, \
+    split_nodes_image, split_nodes_link
 from src.text_node import TextNode, TextType
 
 
@@ -167,6 +168,114 @@ class UtilsTest(unittest.TestCase):
         links = extract_markdown_links(text)
 
         self.assertListEqual(expected_links, links)
+
+    def test_split_nodes_image(self):
+        node = TextNode(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
+            TextType.TEXT,
+        )
+        expected_nodes = [
+            TextNode("This is text with an ", TextType.TEXT),
+            TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.TEXT),
+            TextNode("second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png"),
+        ]
+
+        actual_nodes = split_nodes_image([node])
+
+        self.assertListEqual(expected_nodes, actual_nodes)
+
+    def test_split_nodes_image_starts_and_ends_with_image(self):
+        node = TextNode(
+            "![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
+            TextType.TEXT,
+        )
+        expected_nodes = [
+            TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.TEXT),
+            TextNode("second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png"),
+        ]
+
+        actual_nodes = split_nodes_image([node])
+
+        self.assertListEqual(expected_nodes, actual_nodes)
+
+    def test_split_nodes_image_one_image_in_the_middle(self):
+        node = TextNode(
+            "Text with one ![image](https://i.imgur.com/zjjcJKZ.png) in the middle",
+            TextType.TEXT,
+        )
+        expected_nodes = [
+            TextNode("Text with one ", TextType.TEXT),
+            TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" in the middle", TextType.TEXT),
+        ]
+
+        actual_nodes = split_nodes_image([node])
+
+        self.assertListEqual(expected_nodes, actual_nodes)
+
+    def test_split_nodes_image_no_image(self):
+        node = TextNode("This is text without an image.", TextType.TEXT)
+        expected_images = [TextNode("This is text without an image.", TextType.TEXT)]
+
+        new_nodes = split_nodes_image([node])
+
+        self.assertListEqual(expected_images, new_nodes)
+
+    def test_split_nodes_link(self):
+        node = TextNode(
+            "This is text with an [link](https://i.imgur.com/zjjcJKZ.html) and another [second link](https://i.imgur.com/3elNhQu.html)",
+            TextType.TEXT,
+        )
+        expected_nodes = [
+            TextNode("This is text with an ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://i.imgur.com/zjjcJKZ.html"),
+            TextNode(" and another ", TextType.TEXT),
+            TextNode("second link", TextType.LINK, "https://i.imgur.com/3elNhQu.html"),
+        ]
+
+        actual_nodes = split_nodes_link([node])
+
+        self.assertListEqual(expected_nodes, actual_nodes)
+
+    def test_split_nodes_link_starts_and_ends_with_link(self):
+        node = TextNode(
+            "[link](https://i.imgur.com/zjjcJKZ.html) and another [second link](https://i.imgur.com/3elNhQu.html)",
+            TextType.TEXT,
+        )
+        expected_nodes = [
+            TextNode("link", TextType.LINK, "https://i.imgur.com/zjjcJKZ.html"),
+            TextNode(" and another ", TextType.TEXT),
+            TextNode("second link", TextType.LINK, "https://i.imgur.com/3elNhQu.html"),
+        ]
+
+        actual_nodes = split_nodes_link([node])
+
+        self.assertListEqual(expected_nodes, actual_nodes)
+
+    def test_split_nodes_link_one_link_in_the_middle(self):
+        node = TextNode(
+            "Text with one [link](https://i.imgur.com/zjjcJKZ.html) in the middle",
+            TextType.TEXT,
+        )
+        expected_nodes = [
+            TextNode("Text with one ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://i.imgur.com/zjjcJKZ.html"),
+            TextNode(" in the middle", TextType.TEXT),
+        ]
+
+        actual_nodes = split_nodes_link([node])
+
+        self.assertListEqual(expected_nodes, actual_nodes)
+
+    def test_split_nodes_link_no_link(self):
+        node = TextNode("This is text without an link.", TextType.TEXT)
+        expected_links = [TextNode("This is text without an link.", TextType.TEXT)]
+
+        new_nodes = split_nodes_link([node])
+
+        self.assertListEqual(expected_links, new_nodes)
 
 
 if __name__ == '__main__':
