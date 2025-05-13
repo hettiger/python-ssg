@@ -1,5 +1,6 @@
 import re
-from typing import Callable
+from functools import reduce
+from typing import Callable, TypeVar
 
 from src.html_node import HTMLNode, LeafNode
 from src.text_node import TextNode, TextType
@@ -107,3 +108,18 @@ def _split_nodes(
         return nodes
 
     return list(chain.from_iterable(map(split_node, old_nodes)))
+
+
+TValue = TypeVar('TValue')
+def pipeline(value: TValue, pipes: list[Callable[[TValue], TValue]]) -> TValue:
+    return reduce(lambda nodes, pipe: pipe(nodes), pipes, value)
+
+
+def text_to_textnodes(text: str) -> list[TextNode]:
+    return pipeline([TextNode(text=text, text_type=TextType.TEXT)], pipes=[
+        lambda nodes: split_nodes_delimiter(nodes, "_", TextType.ITALIC),
+        lambda nodes: split_nodes_delimiter(nodes, "**", TextType.BOLD),
+        lambda nodes: split_nodes_delimiter(nodes, "`", TextType.CODE),
+        lambda nodes: split_nodes_image(nodes),
+        lambda nodes: split_nodes_link(nodes),
+    ])

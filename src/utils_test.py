@@ -2,7 +2,7 @@ import unittest
 
 from src.html_node import LeafNode
 from src.utils import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, \
-    split_nodes_image, split_nodes_link
+    split_nodes_image, split_nodes_link, pipeline, text_to_textnodes
 from src.text_node import TextNode, TextType
 
 
@@ -276,6 +276,43 @@ class UtilsTest(unittest.TestCase):
         new_nodes = split_nodes_link([node])
 
         self.assertListEqual(expected_links, new_nodes)
+
+    def test_pipeline(self):
+        expected = 4
+
+        actual = pipeline(value=1, pipes=[
+            lambda x: x + 1,  # 1 + 1 = 2
+            lambda x: x + 2,  # 2 + 2 = 4
+        ])
+
+        self.assertEqual(expected, actual)
+
+    def test_text_to_textnodes(self):
+        text = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        expected_nodes = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.TEXT),
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev"),
+        ]
+
+        actual_nodes = text_to_textnodes(text)
+
+        self.assertListEqual(expected_nodes, actual_nodes)
+
+    def test_text_to_textnodes_empty(self):
+        text = ""
+        expected_nodes = []
+
+        actual_nodes = text_to_textnodes(text)
+
+        self.assertListEqual(expected_nodes, actual_nodes)
 
 
 if __name__ == '__main__':
