@@ -2,6 +2,7 @@ import re
 from functools import reduce
 from typing import Callable, TypeVar
 
+from src.block_type import BlockType
 from src.html_node import HTMLNode, LeafNode
 from src.text_node import TextNode, TextType
 from itertools import chain
@@ -122,3 +123,45 @@ def text_to_textnodes(text: str) -> list[TextNode]:
 
 def markdown_to_blocks(markdown: str) -> list[str]:
     return list(filter(lambda block: block != "", map(lambda block: block.strip(), markdown.split("\n\n"))))
+
+def block_to_block_type(block: str) -> BlockType:
+    if is_heading_block(block):
+        return BlockType.HEADING
+    if is_code_block(block):
+        return BlockType.CODE
+    if is_quote_block(block):
+        return BlockType.QUOTE
+    if is_unordered_list_block(block):
+        return BlockType.UNORDERED_LIST
+    if is_ordered_list_block(block):
+        return BlockType.ORDERED_LIST
+    return BlockType.PARAGRAPH
+
+def is_heading_block(block: str) -> bool:
+    return bool(re.match(r"^#{1,6} ", block))
+
+def is_code_block(block: str) -> bool:
+    lines = block.splitlines()
+    if len(lines) < 3:
+        return False
+    return lines[0] == "```" and lines[-1] == "```"
+
+def is_quote_block(block: str) -> bool:
+    for line in block.splitlines():
+        if not line.startswith(">"):
+            return False
+    return True
+
+def is_unordered_list_block(block: str) -> bool:
+    for line in block.splitlines():
+        if not line.startswith("- "):
+            return False
+    return True
+
+def is_ordered_list_block(block: str) -> bool:
+    number = 1
+    for line in block.splitlines():
+        if not line.startswith(f"{number}. "):
+            return False
+        number += 1
+    return True
