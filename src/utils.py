@@ -1,9 +1,8 @@
 import re
-from functools import reduce
-from typing import Callable, TypeVar
+from typing import Callable
 
 from src.block_type import BlockType
-from src.html_node import HTMLNode, LeafNode
+from src.html_node import HTMLNode, LeafNode, ParentNode
 from src.text_node import TextNode, TextType
 from itertools import chain
 
@@ -124,6 +123,7 @@ def text_to_textnodes(text: str) -> list[TextNode]:
 def markdown_to_blocks(markdown: str) -> list[str]:
     return list(filter(lambda block: block != "", map(lambda block: block.strip(), markdown.split("\n\n"))))
 
+
 def block_to_block_type(block: str) -> BlockType:
     if is_heading_block(block):
         return BlockType.HEADING
@@ -137,8 +137,10 @@ def block_to_block_type(block: str) -> BlockType:
         return BlockType.ORDERED_LIST
     return BlockType.PARAGRAPH
 
+
 def is_heading_block(block: str) -> bool:
     return bool(re.match(r"^#{1,6} ", block))
+
 
 def is_code_block(block: str) -> bool:
     lines = block.splitlines()
@@ -146,17 +148,20 @@ def is_code_block(block: str) -> bool:
         return False
     return lines[0] == "```" and lines[-1] == "```"
 
+
 def is_quote_block(block: str) -> bool:
     for line in block.splitlines():
         if not line.startswith(">"):
             return False
     return True
 
+
 def is_unordered_list_block(block: str) -> bool:
     for line in block.splitlines():
         if not line.startswith("- "):
             return False
     return True
+
 
 def is_ordered_list_block(block: str) -> bool:
     number = 1
@@ -165,3 +170,92 @@ def is_ordered_list_block(block: str) -> bool:
             return False
         number += 1
     return True
+
+
+def markdown_to_html_node(markdown: str) -> HTMLNode:
+    root_node = HTMLNode(tag="div", children=[])
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        match block_type:
+            case BlockType.HEADING:
+                html_node = heading_block_to_html_node(block)
+            case BlockType.CODE:
+                html_node = code_block_to_html_node(block)
+            case BlockType.QUOTE:
+                html_node = quote_block_to_html_node(block)
+            case BlockType.UNORDERED_LIST:
+                html_node = unordered_list_block_to_html_node(block)
+            case BlockType.ORDERED_LIST:
+                html_node = ordered_list_block_to_html_node(block)
+            case _:
+                html_node = paragraph_block_to_html_node(block)
+        root_node.children.append(html_node)
+    return root_node
+
+
+def heading_block_to_html_node(block: str) -> HTMLNode:
+    heading_level = len(re.match(r"^(#{1,6}) ", block).group(1))
+    heading_text = block[heading_level + 1:]
+    children = text_to_children(heading_text)
+    if len(children) == 1:
+        return LeafNode(tag=f"h{heading_level}", value=heading_text)
+    return ParentNode(tag=f"h{heading_level}", children=children)
+
+
+def code_block_to_html_node(block: str) -> HTMLNode:
+    lines = block.splitlines()
+    text = "\n".join(lines[1:-1])+"\n"
+    text_node = TextNode(text=text, text_type=TextType.CODE)
+    return ParentNode(tag="pre", children=[text_node_to_html_node(text_node)])
+
+
+def quote_block_to_html_node(block: str) -> HTMLNode:
+    lines = []
+    for line in block.splitlines():
+        lines.append(re.match(r"^> *(.*)$", line).group(1))
+    text = " ".join(lines)
+    children = text_to_children(text)
+    if len(children) == 1:
+        return LeafNode(tag="blockquote", value=block)
+    return ParentNode(tag="blockquote", children=children)
+
+
+def unordered_list_block_to_html_node(block: str) -> HTMLNode:
+    unordered_list = ParentNode(tag="ul", children=[])
+    list_items = []
+    for line in block.splitlines():
+        list_items.append(re.match(r"^- (.*)$", line).group(1))
+    for text in list_items:
+        children = text_to_children(text)
+        if len(children) == 1:
+            unordered_list.children.append(LeafNode(tag="li", value=text))
+        else:
+            unordered_list.children.append(ParentNode(tag="li", children=children))
+    return unordered_list
+
+
+def ordered_list_block_to_html_node(block: str) -> HTMLNode:
+    ordered_list = ParentNode(tag="ol", children=[])
+    list_items = []
+    for line in block.splitlines():
+        list_items.append(re.match(r"^\d+\. (.*)$", line).group(1))
+    for text in list_items:
+        children = text_to_children(text)
+        if len(children) == 1:
+            ordered_list.children.append(LeafNode(tag="li", value=text))
+        else:
+            ordered_list.children.append(ParentNode(tag="li", children=children))
+    return ordered_list
+
+
+def paragraph_block_to_html_node(block: str) -> HTMLNode:
+    children = text_to_children(block.replace("\n", " "))
+    if len(children) == 1:
+        return LeafNode(tag="p", value=block)
+    return ParentNode(tag="p", children=children)
+
+
+def text_to_children(text: str) -> list[HTMLNode]:
+    nodes = text_to_textnodes(text)
+    return list(map(text_node_to_html_node, nodes))

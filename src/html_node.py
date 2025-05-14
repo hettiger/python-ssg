@@ -14,8 +14,11 @@ class HTMLNode:
         self.children = children
         self.props = props
 
-    def to_html(self):
-        raise NotImplementedError
+    def to_html(self) -> str:
+        if not self.children:
+            return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+        children_html = reduce(lambda html, child: f"{html}{child.to_html()}", self.children, "")
+        return f"<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>"
 
     def props_to_html(self):
         if self.props is None:

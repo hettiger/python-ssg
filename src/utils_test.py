@@ -3,7 +3,8 @@ import unittest
 from src.block_type import BlockType
 from src.html_node import LeafNode
 from src.utils import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, \
-    split_nodes_image, split_nodes_link, text_to_textnodes, markdown_to_blocks, block_to_block_type
+    split_nodes_image, split_nodes_link, text_to_textnodes, markdown_to_blocks, block_to_block_type, \
+    markdown_to_html_node
 from src.text_node import TextNode, TextType
 
 
@@ -426,6 +427,84 @@ This is a code block
 
         self.assertListEqual(expected_block_types, actual_block_types)
 
+    def test_markdown_to_html_node_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+        expected_html = "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>"
+
+        actual_html = markdown_to_html_node(md).to_html()
+
+        self.assertEqual(expected_html, actual_html)
+
+    def test_markdown_to_html_node_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+        expected_html = "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>"
+
+        actual_html = markdown_to_html_node(md).to_html()
+
+        self.assertEqual(expected_html, actual_html)
+
+    def test_markdown_to_html_node_lists(self):
+        md = """
+- unordered **list**
+- with items
+
+1. ordered _list_
+2. with items
+
+- unordered list
+
+1. ordered list
+"""
+        expected_html = "<div><ul><li>unordered <b>list</b></li><li>with items</li></ul><ol><li>ordered <i>list</i></li><li>with items</li></ol><ul><li>unordered list</li></ul><ol><li>ordered list</li></ol></div>"
+
+        actual_html = markdown_to_html_node(md).to_html()
+
+        self.assertEqual(expected_html, actual_html)
+
+    def test_markdown_to_html_node_headlines(self):
+        md = """
+# H1
+
+## H2
+
+### H3
+
+#### H4
+
+##### H5
+
+###### H6
+"""
+        expected_html = "<div><h1>H1</h1><h2>H2</h2><h3>H3</h3><h4>H4</h4><h5>H5</h5><h6>H6</h6></div>"
+
+        actual_html = markdown_to_html_node(md).to_html()
+
+        self.assertEqual(expected_html, actual_html)
+
+    def test_markdown_to_html_node_quotes(self):
+        md = """
+> Single line **quote**
+
+> Multi-line
+> _quote_
+"""
+        expected_html = "<div><blockquote>Single line <b>quote</b></blockquote><blockquote>Multi-line <i>quote</i></blockquote></div>"
+
+        actual_html = markdown_to_html_node(md).to_html()
+
+        self.assertEqual(expected_html, actual_html)
 
 if __name__ == '__main__':
     unittest.main()
