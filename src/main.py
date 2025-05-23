@@ -1,9 +1,10 @@
-from src.text_node import TextNode, TextType
+from base_path import base_path
+from copy_contents import copy_contents
 
 
 def main():
-    node = TextNode("This is some anchor text", TextType.LINK, "https://www.boot.dev")
-    print(node)
+    copy_contents(base_path("static"), base_path("public"))
+
 
 if __name__ == "__main__":
     main()

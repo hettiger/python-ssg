@@ -1,11 +1,11 @@
 import unittest
 
-from src.block_type import BlockType
-from src.html_node import LeafNode
-from src.utils import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, \
+from block_type import BlockType
+from html_node import LeafNode
+from utils import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, \
     split_nodes_image, split_nodes_link, text_to_textnodes, markdown_to_blocks, block_to_block_type, \
     markdown_to_html_node
-from src.text_node import TextNode, TextType
+from text_node import TextNode, TextType
 
 
 class UtilsTest(unittest.TestCase):

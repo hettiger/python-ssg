@@ -1,10 +1,10 @@
 import re
 from typing import Callable
-
-from src.block_type import BlockType
-from src.html_node import HTMLNode, LeafNode, ParentNode
-from src.text_node import TextNode, TextType
 from itertools import chain
+
+from block_type import BlockType
+from html_node import HTMLNode, LeafNode, ParentNode
+from text_node import TextNode, TextType
 
 
 def text_node_to_html_node(text_node: TextNode) -> HTMLNode:
