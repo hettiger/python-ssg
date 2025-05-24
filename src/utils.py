@@ -213,11 +213,14 @@ def code_block_to_html_node(block: str) -> HTMLNode:
 def quote_block_to_html_node(block: str) -> HTMLNode:
     lines = []
     for line in block.splitlines():
-        lines.append(re.match(r"^> *(.*)$", line).group(1))
+        matches = re.match(r"^>\s*(\S+.*)$", line)
+        if not matches:
+            continue
+        lines.append(matches.group(1))
     text = " ".join(lines)
     children = text_to_children(text)
     if len(children) == 1:
-        return LeafNode(tag="blockquote", value=block)
+        return LeafNode(tag="blockquote", value=text)
     return ParentNode(tag="blockquote", children=children)
 
 

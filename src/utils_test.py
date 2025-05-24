@@ -325,6 +325,26 @@ This is the same paragraph on a new line
 
         self.assertListEqual(expected_blocks, actual_blocks)
 
+    def test_markdown_to_blocks_quote(self):
+        md = """> Single line quote
+
+> Multiline
+> quote
+
+> "I am in fact a Hobbit in all but size."
+>
+> -- J.R.R. Tolkien
+"""
+        expected_blocks = [
+            '> Single line quote',
+            '> Multiline\n> quote',
+            '> "I am in fact a Hobbit in all but size."\n>\n> -- J.R.R. Tolkien',
+        ]
+
+        actual_blocks = markdown_to_blocks(md)
+
+        self.assertListEqual(expected_blocks, actual_blocks)
+
     def test_markdown_to_blocks_excessive_empty_lines(self):
         md = """This is **bolded** paragraph
 
@@ -499,8 +519,12 @@ the **same** even with inline stuff
 
 > Multi-line
 > _quote_
+
+> "I am in fact a Hobbit in all but size."
+>
+> -- J.R.R. Tolkien
 """
-        expected_html = "<div><blockquote>Single line <b>quote</b></blockquote><blockquote>Multi-line <i>quote</i></blockquote></div>"
+        expected_html = "<div><blockquote>Single line <b>quote</b></blockquote><blockquote>Multi-line <i>quote</i></blockquote><blockquote>\"I am in fact a Hobbit in all but size.\" -- J.R.R. Tolkien</blockquote></div>"
 
         actual_html = markdown_to_html_node(md).to_html()
 
