@@ -231,10 +231,7 @@ def unordered_list_block_to_html_node(block: str) -> HTMLNode:
         list_items.append(re.match(r"^- (.*)$", line).group(1))
     for text in list_items:
         children = text_to_children(text)
-        if len(children) == 1:
-            unordered_list.children.append(LeafNode(tag="li", value=text))
-        else:
-            unordered_list.children.append(ParentNode(tag="li", children=children))
+        unordered_list.children.append(ParentNode(tag="li", children=children))
     return unordered_list
 
 
