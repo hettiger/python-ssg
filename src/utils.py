@@ -254,8 +254,6 @@ def ordered_list_block_to_html_node(block: str) -> HTMLNode:
 
 def paragraph_block_to_html_node(block: str) -> HTMLNode:
     children = text_to_children(block.replace("\n", " "))
-    if len(children) == 1:
-        return LeafNode(tag="p", value=block)
     return ParentNode(tag="p", children=children)
 
 
