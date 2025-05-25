@@ -1,15 +1,15 @@
 from base_path import base_path
 from copy_contents import copy_contents
-from generate_page import generate_page
+from generate_pages_recursive import generate_pages_recursive
 
 
 def main():
     copy_contents(base_path("static"), base_path("public"))
 
-    generate_page(
-        from_path=base_path("content/index.md"),
+    generate_pages_recursive(
+        dir_path_content=base_path("content"),
         template_path=base_path("template.html"),
-        dest_path=base_path("public/index.html")
+        dest_dir_path=base_path("public")
     )
 
 
